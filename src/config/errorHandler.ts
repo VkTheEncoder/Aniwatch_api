@@ -1,28 +1,32 @@
+// src/config/errorHandler.ts
+
 import { HiAnimeError } from "aniwatch";
 import type { ErrorHandler, NotFoundHandler } from "hono";
 import type { ContentfulStatusCode } from "hono/utils/http-status";
 import { log } from "./logger.js";
 
-const errResp: { status: ContentfulStatusCode; message: string } = {
-    status: 500,
-    message: "Internal Server Error",
-};
-
 export const errorHandler: ErrorHandler = (err, c) => {
-    log.error(JSON.stringify(err));
+  // Log the raw error for debugging
+  log.error(JSON.stringify(err));
 
-    if (err instanceof HiAnimeError) {
-        errResp.status = err.status as ContentfulStatusCode;
-        errResp.message = err.message;
-    }
+  // Default to 500
+  let status: ContentfulStatusCode = 500;
+  let message = "Internal Server Error";
 
-    return c.json(errResp, errResp.status);
+  // If it’s our scraper’s error class, pull its status/message
+  if (err instanceof HiAnimeError) {
+    status = (err.status as ContentfulStatusCode) || 500;
+    message = err.message;
+  }
+
+  // Respond with JSON { status, message } and the appropriate HTTP code
+  return c.json({ status, message }, status);
 };
 
 export const notFoundHandler: NotFoundHandler = (c) => {
-    errResp.status = 404;
-    errResp.message = "Not Found";
+  const status: ContentfulStatusCode = 404;
+  const message = "Not Found";
 
-    log.error(JSON.stringify(errResp));
-    return c.json(errResp, errResp.status);
+  log.error(JSON.stringify({ status, message }));
+  return c.json({ status, message }, status);
 };
