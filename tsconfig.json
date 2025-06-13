@@ -24,7 +24,17 @@
     "forceConsistentCasingInFileNames": true,
     "strictFunctionTypes": true,
     "lib": ["ES2023"]
+    // tell TS where to find our custom shims
+   "typeRoots": [
+     "./src/types",
+     "./node_modules/@types"
+   ]
   },
-  "include": ["./src", "./api"],
+  "include": [
+    "./src",
+    "./api",
+    // include our shims so TS will load them
+    "./src/types/**/*.d.ts"
+  ],
   "exclude": ["node_modules"]
 }
