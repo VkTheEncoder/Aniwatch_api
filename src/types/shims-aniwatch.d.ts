@@ -2,34 +2,37 @@
 
 /**
  * Minimal type declarations for the `aniwatch` scraper package.
- * This lets TypeScript see both the HiAnime namespace and the error class.
+ * Expands the HiAnime namespace so all of your referenced types exist.
  */
 
 declare module "aniwatch" {
   /**
    * The HiAnime scraper namespace.  
-   * In your code you do things like `new HiAnime.Scraper()`.
-   * We leave it as `any` so any nested classes or methods are allowed.
+   * Your code references things like HiAnime.Scraper,
+   * plus these types: ScrapedEpisodeServers, AnimeServers, etc.
    */
   export namespace HiAnime {
-    // You can add specific types here later if you like:
-    // export class Scraper { ... }
-    // export function search(...): Promise<...>;
+    export class Scraper {
+      // you can leave this empty or add: search(...): Promise<any>, etc.
+    }
+
+    // These are the types your routes expect to import/use:
+    export type ScrapedEpisodeServers       = any;
+    export type AnimeServers                = any;
+    export type ScrapedAnimeEpisodesSources = any;
+    export type ScrapedAnimeEpisodes        = any;
+    export type ScrapedNextEpisodeSchedule  = any;
   }
 
   /**
-   * The runtime value you import in your code:
-   *   import { HiAnime } from "aniwatch";
+   * The runtime value you do `import { HiAnime } from "aniwatch";`
    */
   export const HiAnime: any;
 
   /**
-   * The error class thrown by the scraper when something goes wrong:
-   *   import { HiAnimeError } from "aniwatch";
-   *   if (err instanceof HiAnimeError) { … }
+   * The error class thrown by the scraper on HTTP/parsing errors.
    */
   export class HiAnimeError extends Error {
-    /** HTTP status code, e.g. 404 or 500 */
     public status: number;
     constructor(message?: string, status?: number);
   }
