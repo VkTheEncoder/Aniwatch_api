@@ -7,10 +7,7 @@
     "allowJs": true,
     "resolveJsonModule": true,
     "moduleDetection": "force",
-    //
     "strict": true,
-    // "noUncheckedIndexedAccess": true,
-    //
     "moduleResolution": "NodeNext",
     "module": "NodeNext",
     "noUnusedLocals": true,
@@ -18,23 +15,17 @@
     "outDir": "./dist",
     "rootDir": "./",
     "sourceMap": true,
-    //
     "declaration": true,
     "removeComments": true,
     "forceConsistentCasingInFileNames": true,
     "strictFunctionTypes": true,
-    "lib": ["ES2023"]
-    // tell TS where to find our custom shims
-   "typeRoots": [
-     "./src/types",
-     "./node_modules/@types"
-   ]
+    "lib": ["ES2023"],
+    "typeRoots": ["./src/types", "./node_modules/@types"]
   },
   "include": [
-    "./src",
-    "./api",
-    // include our shims so TS will load them
-    "./src/types/**/*.d.ts"
+    "src",
+    "api",
+    "src/types"
   ],
   "exclude": ["node_modules"]
 }
