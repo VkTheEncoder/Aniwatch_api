@@ -1,6 +1,9 @@
 # build stage for building .ts files
 FROM node:22-alpine as build
 
+# install git so npm can fetch your patched aniwatch from GitHub
+RUN apk add --no-cache git
+
 RUN mkdir /home/app
 
 WORKDIR /home/app
