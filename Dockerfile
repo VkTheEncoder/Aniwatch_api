@@ -38,11 +38,11 @@ USER zoro
 # set working directory
 WORKDIR /app
 
-# copy package files (including lockfile!) for npm install
-COPY --chown=zoro:aniwatch package.json package-lock.json ./
+# copy only package.json (we have no lockfile)
+COPY --chown=zoro:aniwatch package.json ./
 
-# install only production deps (including your git+https://…/aniwatch fork)
-RUN npm ci --omit=dev --ignore-scripts
+# install production deps (including your git+…/aniwatch fork)
+RUN npm install --omit=dev --ignore-scripts
 
 # copy public folder from build stage to prod
 COPY --from=build --chown=zoro:aniwatch /home/app/public /app/public
