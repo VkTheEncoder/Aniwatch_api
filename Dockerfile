@@ -1,63 +1,42 @@
-# build stage for building .ts files
-FROM node:22-alpine as build
+# ─── BUILD STAGE ───────────────────────────────────────────────────────
+FROM node:22-alpine AS build
 
-# install git so npm can fetch your patched aniwatch from GitHub
-RUN apk add --no-cache curl git
-
-RUN mkdir /home/app
+# 1) install git so npm can clone your forked 'aniwatch'
+RUN apk add --no-cache git
 
 WORKDIR /home/app
 
-COPY package.json .
+# 2) copy package files and install ALL deps (dev+prod)
+COPY package.json package-lock.json ./
+RUN npm ci --ignore-scripts
 
-RUN npm install --ignore-scripts
-
+# 3) copy rest of code and build
 COPY . .
-
 RUN npm run build
 
-# prod stage for including only necessary files
-FROM node:22-alpine as prod
+# ─── PROD STAGE ────────────────────────────────────────────────────────
+FROM node:22-alpine AS prod
 
-LABEL org.opencontainers.image.source=https://github.com/ghoshRitesh12/aniwatch-api
-LABEL org.opencontainers.image.description="NodeJS API for obtaining anime data from hianime.to"
-LABEL org.opencontainers.image.licenses=MIT
-
-# install curl for healthcheck
+# 4) install curl (for healthchecks, if you still need them)
 RUN apk add --no-cache curl
 
-# create a non-privileged user
+# 5) create a non-privileged user
 RUN addgroup -S aniwatch && adduser -S zoro -G aniwatch
 
-# set secure folder permissions
-RUN mkdir -p /app/public /app/dist && chown -R zoro:aniwatch /app
-
-# set non-privileged user
-USER zoro
-
-# set working directory
 WORKDIR /app
 
-# copy only package.json (we have no lockfile)
-COPY --chown=zoro:aniwatch package.json ./
+# 6) copy only what's needed at runtime:
+#    - your built JS in /dist
+#    - any static assets in /public
+#    - your exact node_modules from the build
+COPY --from=build --chown=zoro:aniwatch /home/app/dist ./dist
+COPY --from=build --chown=zoro:aniwatch /home/app/public ./public
+COPY --from=build --chown=zoro:aniwatch /home/app/node_modules ./node_modules
+COPY --from=build --chown=zoro:aniwatch /home/app/package.json ./package.json
 
-# install production deps (including your git+…/aniwatch fork)
-RUN npm install --omit=dev --ignore-scripts
+# 7) switch to non-privileged user
+USER zoro
 
-# copy public folder from build stage to prod
-COPY --from=build --chown=zoro:aniwatch /home/app/public /app/public
-
-# copy dist folder from build stage to prod
-COPY --from=build --chown=zoro:aniwatch /home/app/dist /app/dist
-
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s CMD [ "npm", "run", "healthcheck" ]
-
-ENV NODE_ENV=production
-ENV PORT=4000
-
-# exposed port
+# 8) expose and run
 EXPOSE 4000
-
-CMD [ "node", "dist/src/server.js" ]
-
-# exit
+CMD ["node", "dist/src/server.js"]
