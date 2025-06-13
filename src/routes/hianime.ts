@@ -6,234 +6,198 @@ import type { ServerContext } from "../config/context.js";
 const hianime = new HiAnime.Scraper();
 const hianimeRouter = new Hono<ServerContext>();
 
-// /api/v2/hianime
+// Redirect root
 hianimeRouter.get("/", (c) => c.redirect("/", 301));
 
-// /api/v2/hianime/home
+// Home page
 hianimeRouter.get("/home", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-
-    const data = await cache.getOrSet<HiAnime.ScrapedHomePage>(
-        hianime.getHomePage,
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const data = await cache.getOrSet(
+    () => hianime.getHomePage(),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/azlist/{sortOption}?page={page}
+// A–Z list
 hianimeRouter.get("/azlist/:sortOption", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const sortOption = c.req.param("sortOption").trim().toLowerCase();
+  const page = Number(c.req.query("page") || "1") || 1;
 
-    const sortOption = decodeURIComponent(
-        c.req.param("sortOption").trim().toLowerCase()
-    ) as HiAnime.AZListSortOptions;
-    const page: number =
-        Number(decodeURIComponent(c.req.query("page") || "")) || 1;
-
-    const data = await cache.getOrSet<HiAnime.ScrapedAnimeAZList>(
-        async () => hianime.getAZList(sortOption, page),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getAZList(sortOption, page),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/qtip/{animeId}
+// Qtip info
 hianimeRouter.get("/qtip/:animeId", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    const animeId = decodeURIComponent(c.req.param("animeId").trim());
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const animeId = c.req.param("animeId").trim();
 
-    const data = await cache.getOrSet<HiAnime.ScrapedAnimeQtipInfo>(
-        async () => hianime.getQtipInfo(animeId),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getQtipInfo(animeId),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/category/{name}?page={page}
+// Category
 hianimeRouter.get("/category/:name", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    const categoryName = decodeURIComponent(
-        c.req.param("name").trim()
-    ) as HiAnime.AnimeCategories;
-    const page: number =
-        Number(decodeURIComponent(c.req.query("page") || "")) || 1;
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const categoryName = c.req.param("name").trim();
+  const page = Number(c.req.query("page") || "1") || 1;
 
-    const data = await cache.getOrSet<HiAnime.ScrapedAnimeCategory>(
-        async () => hianime.getAnimeCategory(categoryName, page),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getCategoryAnime(categoryName, page),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/genre/{name}?page={page}
+// Genre
 hianimeRouter.get("/genre/:name", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    const genreName = decodeURIComponent(c.req.param("name").trim());
-    const page: number =
-        Number(decodeURIComponent(c.req.query("page") || "")) || 1;
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const genreName = c.req.param("name").trim();
+  const page = Number(c.req.query("page") || "1") || 1;
 
-    const data = await cache.getOrSet<HiAnime.ScrapedGenreAnime>(
-        async () => hianime.getGenreAnime(genreName, page),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getGenreAnime(genreName, page),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/producer/{name}?page={page}
+// Producer
 hianimeRouter.get("/producer/:name", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    const producerName = decodeURIComponent(c.req.param("name").trim());
-    const page: number =
-        Number(decodeURIComponent(c.req.query("page") || "")) || 1;
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const producerName = c.req.param("name").trim();
+  const page = Number(c.req.query("page") || "1") || 1;
 
-    const data = await cache.getOrSet<HiAnime.ScrapedProducerAnime>(
-        async () => hianime.getProducerAnimes(producerName, page),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getProducerAnimes(producerName, page),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/schedule?date={date}&tzOffset={tzOffset}
+// Schedule
 hianimeRouter.get("/schedule", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const date = c.req.query("date") || "";
+  const tzOffset = Number(c.req.query("tzOffset") || "-330");
 
-    const date = decodeURIComponent(c.req.query("date") || "");
-    let tzOffset = Number(
-        decodeURIComponent(c.req.query("tzOffset") || "-330")
-    );
-    tzOffset = isNaN(tzOffset) ? -330 : tzOffset;
-
-    const data = await cache.getOrSet<HiAnime.ScrapedEstimatedSchedule>(
-        async () => hianime.getEstimatedSchedule(date, tzOffset),
-        `${cacheConfig.key}_${tzOffset}`,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getEstimatedSchedule(date, isNaN(tzOffset) ? -330 : tzOffset),
+    `${key}_${tzOffset}`,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/search?q={query}&page={page}&filters={...filters}
+// Search
 hianimeRouter.get("/search", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    let { q: query, page, ...filters } = c.req.query();
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const query = c.req.query("q") || "";
+  const page = Number(c.req.query("page") || "1") || 1;
+  const filters = { ...c.req.query() };
+  delete filters.q;
+  delete filters.page;
 
-    query = decodeURIComponent(query || "");
-    const pageNo = Number(decodeURIComponent(page || "")) || 1;
-
-    const data = await cache.getOrSet<HiAnime.ScrapedAnimeSearchResult>(
-        async () => hianime.getAnimeSearchResults(query, pageNo, filters),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.search(query, page, filters),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/search/suggestion?q={query}
+// Search suggestions
 hianimeRouter.get("/search/suggestion", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    const query = decodeURIComponent(c.req.query("q") || "");
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const query = c.req.query("q") || "";
 
-    const data = await cache.getOrSet<HiAnime.ScrapedAnimeSearchSuggestion>(
-        async () => hianime.getAnimeSearchSuggestion(query),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.searchSuggestions(query),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/anime/:animeId
+// Anime details
 hianimeRouter.get("/anime/:animeId", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    const animeId = decodeURIComponent(c.req.param("animeId").trim());
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const animeId = c.req.param("animeId").trim();
 
-    const data = await cache.getOrSet<HiAnime.ScrapedAnimeAboutInfo>(
-        async () => hianime.getAnimeAboutInfo(animeId),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getInfo(animeId),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/episode/servers?animeEpisodeId={id}
+// Episode servers
 hianimeRouter.get("/episode/servers", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    const animeEpisodeId = decodeURIComponent(
-        c.req.query("animeEpisodeId") || ""
-    );
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const episodeId = c.req.query("animeEpisodeId") || "";
 
-    const data = await cache.getOrSet<HiAnime.ScrapedEpisodeServers>(
-        async () => hianime.getEpisodeServers(animeEpisodeId),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getEpisodeServers(episodeId),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/episode/sources?animeEpisodeId={episodeId}&server={server}&category={category}
+// Episode sources
 hianimeRouter.get("/episode/sources", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    const animeEpisodeId = decodeURIComponent(
-        c.req.query("animeEpisodeId") || ""
-    );
-    const server = decodeURIComponent(
-        c.req.query("server") || HiAnime.AnimeServers.VidStreaming
-    ) as HiAnime.AnimeServers;
-    const category = decodeURIComponent(c.req.query("category") || "sub") as
-        | "sub"
-        | "dub"
-        | "raw";
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const episodeId = c.req.query("animeEpisodeId") || "";
+  const server = c.req.query("server") || "vidstreaming";
+  const category = c.req.query("category") || "sub";
 
-    const data = await cache.getOrSet<HiAnime.ScrapedAnimeEpisodesSources>(
-        async () => hianime.getAnimeEpisodeSources(animeEpisodeId, server, category),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getEpisodeSources(episodeId, server, category),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/anime/:animeId/episodes
+// Episode list
 hianimeRouter.get("/anime/:animeId/episodes", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    const animeId = decodeURIComponent(c.req.param("animeId").trim());
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const animeId = c.req.param("animeId").trim();
 
-    const data = await cache.getOrSet<HiAnime.ScrapedAnimeEpisodes>(
-        async () => hianime.getAnimeEpisodes(animeId),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getEpisodes(animeId),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
-// /api/v2/hianime/anime/:animeId/next-episode-schedule
+// Next-episode schedule
 hianimeRouter.get("/anime/:animeId/next-episode-schedule", async (c) => {
-    const cacheConfig = c.get("CACHE_CONFIG");
-    const animeId = decodeURIComponent(c.req.param("animeId").trim());
+  const { key, duration } = c.get("CACHE_CONFIG");
+  const animeId = c.req.param("animeId").trim();
 
-    const data = await cache.getOrSet<HiAnime.ScrapedNextEpisodeSchedule>(
-        async () => hianime.getNextEpisodeSchedule(animeId),
-        cacheConfig.key,
-        cacheConfig.duration
-    );
-
-    return c.json({ status: 200, data }, { status: 200 });
+  const data = await cache.getOrSet(
+    () => hianime.getNextEpisodeSchedule(animeId),
+    key,
+    duration
+  );
+  return c.json({ status: 200, data });
 });
 
 export { hianimeRouter };
