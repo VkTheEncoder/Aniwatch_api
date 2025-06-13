@@ -65,7 +65,7 @@ hianimeRouter.get("/category/:name", async (c) => {
         Number(decodeURIComponent(c.req.query("page") || "")) || 1;
 
     const data = await cache.getOrSet<HiAnime.ScrapedAnimeCategory>(
-        async () => hianime.getCategoryAnime(categoryName, page),
+        async () => hianime.getAnimeCategory(categoryName, page),
         cacheConfig.key,
         cacheConfig.duration
     );
@@ -133,7 +133,7 @@ hianimeRouter.get("/search", async (c) => {
     const pageNo = Number(decodeURIComponent(page || "")) || 1;
 
     const data = await cache.getOrSet<HiAnime.ScrapedAnimeSearchResult>(
-        async () => hianime.search(query, pageNo, filters),
+        async () => hianime.getAnimeSearchResults(query, pageNo, filters),
         cacheConfig.key,
         cacheConfig.duration
     );
@@ -147,7 +147,7 @@ hianimeRouter.get("/search/suggestion", async (c) => {
     const query = decodeURIComponent(c.req.query("q") || "");
 
     const data = await cache.getOrSet<HiAnime.ScrapedAnimeSearchSuggestion>(
-        async () => hianime.searchSuggestions(query),
+        async () => hianime.getAnimeSearchSuggestion(query),
         cacheConfig.key,
         cacheConfig.duration
     );
@@ -155,13 +155,13 @@ hianimeRouter.get("/search/suggestion", async (c) => {
     return c.json({ status: 200, data }, { status: 200 });
 });
 
-// /api/v2/hianime/anime/{animeId}
+// /api/v2/hianime/anime/:animeId
 hianimeRouter.get("/anime/:animeId", async (c) => {
     const cacheConfig = c.get("CACHE_CONFIG");
     const animeId = decodeURIComponent(c.req.param("animeId").trim());
 
     const data = await cache.getOrSet<HiAnime.ScrapedAnimeAboutInfo>(
-        async () => hianime.getInfo(animeId),
+        async () => hianime.getAnimeAboutInfo(animeId),
         cacheConfig.key,
         cacheConfig.duration
     );
@@ -185,15 +185,14 @@ hianimeRouter.get("/episode/servers", async (c) => {
     return c.json({ status: 200, data }, { status: 200 });
 });
 
-// episodeId=steinsgate-3?ep=230
-// /api/v2/hianime/episode/sources?animeEpisodeId={episodeId}?server={server}&category={category (dub or sub)}
+// /api/v2/hianime/episode/sources?animeEpisodeId={episodeId}&server={server}&category={category}
 hianimeRouter.get("/episode/sources", async (c) => {
     const cacheConfig = c.get("CACHE_CONFIG");
     const animeEpisodeId = decodeURIComponent(
         c.req.query("animeEpisodeId") || ""
     );
     const server = decodeURIComponent(
-        c.req.query("server") || HiAnime.Servers.VidStreaming
+        c.req.query("server") || HiAnime.AnimeServers.VidStreaming
     ) as HiAnime.AnimeServers;
     const category = decodeURIComponent(c.req.query("category") || "sub") as
         | "sub"
@@ -201,7 +200,7 @@ hianimeRouter.get("/episode/sources", async (c) => {
         | "raw";
 
     const data = await cache.getOrSet<HiAnime.ScrapedAnimeEpisodesSources>(
-        async () => hianime.getEpisodeSources(animeEpisodeId, server, category),
+        async () => hianime.getAnimeEpisodeSources(animeEpisodeId, server, category),
         cacheConfig.key,
         cacheConfig.duration
     );
@@ -209,13 +208,13 @@ hianimeRouter.get("/episode/sources", async (c) => {
     return c.json({ status: 200, data }, { status: 200 });
 });
 
-// /api/v2/hianime/anime/{anime-id}/episodes
+// /api/v2/hianime/anime/:animeId/episodes
 hianimeRouter.get("/anime/:animeId/episodes", async (c) => {
     const cacheConfig = c.get("CACHE_CONFIG");
     const animeId = decodeURIComponent(c.req.param("animeId").trim());
 
     const data = await cache.getOrSet<HiAnime.ScrapedAnimeEpisodes>(
-        async () => hianime.getEpisodes(animeId),
+        async () => hianime.getAnimeEpisodes(animeId),
         cacheConfig.key,
         cacheConfig.duration
     );
@@ -223,7 +222,7 @@ hianimeRouter.get("/anime/:animeId/episodes", async (c) => {
     return c.json({ status: 200, data }, { status: 200 });
 });
 
-// /api/v2/hianime/anime/{anime-id}/next-episode-schedule
+// /api/v2/hianime/anime/:animeId/next-episode-schedule
 hianimeRouter.get("/anime/:animeId/next-episode-schedule", async (c) => {
     const cacheConfig = c.get("CACHE_CONFIG");
     const animeId = decodeURIComponent(c.req.param("animeId").trim());
