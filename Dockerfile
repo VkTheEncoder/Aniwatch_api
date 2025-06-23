@@ -1,6 +1,8 @@
 # build stage for building .ts files
 FROM node:22-alpine as build
 
+RUN apk add --no-cache git openssh ca-certificates
+
 RUN mkdir /home/app
 
 WORKDIR /home/app
@@ -22,6 +24,8 @@ LABEL org.opencontainers.image.licenses=MIT
 
 # install curl for healthcheck
 RUN apk add --no-cache curl
+
+RUN apk add --no-cache curl git openssh ca-certificates
 
 # create a non-privileged user
 RUN addgroup -S aniwatch && adduser -S zoro -G aniwatch
