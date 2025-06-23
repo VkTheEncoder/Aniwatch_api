@@ -1,7 +1,7 @@
 {
     "name": "aniwatch-api",
-    "version": "2.17.0",
-    "description": "NodeJS API for obtaining anime data from hianimez.to",
+    "version": "2.17.1", 
+    "description": "NodeJS API for obtaining anime data from hianime.pe",
     "main": "dist/src/server.js",
     "type": "module",
     "scripts": {
@@ -19,12 +19,12 @@
     },
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/ghoshRitesh12/aniwatch-api.git"
+        "url": "git+https://github.com/VkTheEncoder/Aniwatch_api.git"
     },
     "bugs": {
-        "url": "https://github.com/ghoshRitesh12/aniwatch-api/issues"
+        "url": "https://github.com/VkTheEncoder/Aniwatch_api/issues"
     },
-    "homepage": "https://github.com/ghoshRitesh12/aniwatch-api#readme",
+    "homepage": "https://github.com/VkTheEncoder/Aniwatch_api#readme",
     "keywords": [
         "anime",
         "weeb",
@@ -38,7 +38,7 @@
     "license": "MIT",
     "dependencies": {
         "@hono/node-server": "^1.14.2",
-        "aniwatch": "git+https://github.com/VkTheEncoder/aniiwatch.git#main",
+        "aniwatch": "git+https://github.com/VkTheEncoder/aniiwatch.git",
         "dotenv": "^16.5.0",
         "envalid": "^8.0.0",
         "hono": "^4.7.10",
