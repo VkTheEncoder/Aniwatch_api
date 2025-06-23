@@ -39,7 +39,7 @@
     "license": "MIT",
     "dependencies": {
         "@hono/node-server": "^1.14.2",
-        "@vktheencoder/aniwatch": "^1.0.0",
+        "aniwatch": "git+https://github.com/VkTheEncoder/aniiwatch.git#main",
         "dotenv": "^16.5.0",
         "envalid": "^8.0.0",
         "hono": "^4.7.10",
